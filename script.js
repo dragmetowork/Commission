@@ -3,13 +3,12 @@
 // ==========================================
 const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw_Y_AyRP5ATF1lV5QMPgBEGogC_T7jN91NHrXwecT3GXFzM8WzPYBwgcAmOmEjlR6G/exec";
 
-
 // ==========================================
 // 2. โค้ดสำหรับหน้าแรก (index.html) - ส่งข้อมูลคอมมิชชั่น
 // ==========================================
 function sendDataToGoogleScript(nameData, emailData) {
     const payload = {
-        action: "submitCommission", // ใส่เพิ่มเพื่อบอกกูเกิลว่านี่คือการส่งข้อมูลใหม่
+        action: "submitCommission",
         name: nameData,
         email: emailData
     };
@@ -17,6 +16,7 @@ function sendDataToGoogleScript(nameData, emailData) {
     fetch(googleScriptUrl, {
         method: 'POST',
         mode: 'cors',
+        redirect: 'follow', // ✅ เพิ่มการอนุญาต Redirect
         headers: {
             'Content-Type': 'text/plain',
         },
@@ -25,7 +25,6 @@ function sendDataToGoogleScript(nameData, emailData) {
     .then(response => response.json())
     .then(data => {
         if(data.status === "success") {
-            // เมื่อบันทึกสำเร็จ สั่งย้ายไปหน้าตรวจสอบสถานะทันที
             window.location.href = "Status.html";
         } else {
             alert("เกิดข้อผิดพลาด: " + data.message);
@@ -37,12 +36,10 @@ function sendDataToGoogleScript(nameData, emailData) {
     });
 }
 
-
 // ==========================================
 // 3. โค้ดสำหรับหน้าตรวจสอบสถานะ (Status.html) - ดึงข้อมูลคิวงาน
 // ==========================================
 
-// ฟังก์ชันคำนวณวันเวลารอ (ย้ายมาจากในแท็กสคริปต์เดิม)
 function calcWaitDays(fromDate, toDateStr, holidays) {
   var to  = new Date(toDateStr);
   var cur = new Date(fromDate);
@@ -57,13 +54,11 @@ function calcWaitDays(fromDate, toDateStr, holidays) {
   return count;
 }
 
-// ฟังก์ชันแปลงรูปแบบวันที่แบบไทย
 function formatThaiDate(dateStr) {
   var d = new Date(dateStr);
   return d.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
 }
 
-// ฟังก์ชันเปิดป๊อปอัพแสดงขั้นตอนการทำงาน
 function showStatusModal(btn) {
   var currentStatus = btn.getAttribute("data-status");
   var steps = [
@@ -115,11 +110,12 @@ function showStatusModal(btn) {
   document.getElementById("statusModal").style.display = "flex";
 }
 
-// สั่งให้โหลดข้อมูลคิวอัตโนมัติ "เฉพาะตอนเปิดหน้า Status.html"
+// สั่งให้โหลดข้อมูลคิวอัตโนมัติ
 window.addEventListener('DOMContentLoaded', (event) => {
-  // ตรวจสอบว่าถ้าหน้าเว็บปัจจุบันคือหน้า Status.html ถึงจะเริ่มดึงข้อมูลคิวจากกูเกิล
   if (document.getElementById("queue-loading")) {
-    fetch(googleScriptUrl + "?action=getQueueInfo")
+    
+    // ✅ เพิ่ม { redirect: "follow" } ตรงนี้
+    fetch(googleScriptUrl + "?action=getQueueInfo", { redirect: "follow" })
       .then(response => response.json())
       .then(function(info) {
         document.getElementById("queue-loading").style.display = "none";
@@ -160,7 +156,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
   }
 });
 
-// ฟังก์ชันค้นหาสถานะคิวงานผ่านอีเมล (สำหรับหน้า Status.html)
+// ฟังก์ชันค้นหาสถานะคิวงานผ่านอีเมล
 function searchStatus() {
   var searchKey   = document.getElementById("searchKey").value.trim();
   var resultSide = document.getElementById("result-zone-side");
@@ -176,10 +172,10 @@ function searchStatus() {
   btn.textContent = "กำลังค้นหา...";
   resultSide.style.display = "none";
 
-  // ยิงคำสั่ง POST ไปค้นหาที่กูเกิลสคริปต์
   fetch(googleScriptUrl, {
     method: "POST",
     mode: "cors",
+    redirect: "follow", // ✅ เพิ่มการอนุญาต Redirect
     headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({ action: "checkCustomerStatus", key: searchKey })
   })
