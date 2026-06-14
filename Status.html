@@ -289,7 +289,7 @@
   </div>
 
   <script>
-  //<![CDATA[
+const googleScriptUrl = "https://script.google.com/macros/s/AKfycbxBvbXELIDEVe_VkmedB7TN-YQDpiGKiOlGR4dFSPT6TOVMgjJ6O3FeD0dWV7kxX2tPOA/exec";
 
     function calcWaitDays(fromDate, toDateStr, holidays) {
       var to  = new Date(toDateStr);
@@ -361,9 +361,11 @@
       document.getElementById("statusModal").style.display = "flex";
     }
 
+    // แก้ไขจุดที่ 1: โหลดข้อมูลคิวเริ่มต้นผ่าน Fetch API แทน google.script.run
     window.onload = function() {
-      google.script.run
-        .withSuccessHandler(function(info) {
+      fetch(googleScriptUrl + "?action=getQueueInfo")
+        .then(response => response.json())
+        .then(function(info) {
           document.getElementById("queue-loading").style.display = "none";
           document.getElementById("queue-content").style.display = "block";
 
@@ -395,14 +397,15 @@
           document.getElementById("q-start-date").textContent   = waitDays > 0 ? formatThaiDate(startStr) : "เริ่มได้เลย";
           document.getElementById("q-wait-wrap").style.display  = "block";
         })
-        .withFailureHandler(function() {
-          document.getElementById("queue-loading").textContent = "ไม่สามารถโหลดข้อมูลคิวได้";
-        })
-        .getQueueInfo();
+        .catch(function(err) {
+          document.getElementById("queue-loading").textContent = "ไม่สามารถโหลดข้อมูลคิวได้ (เกิดข้อผิดพลาดของระบบ)";
+          console.error(err);
+        });
     };
 
+    // แก้ไขจุดที่ 2: ระบบค้นหาด้วยอีเมลผ่าน Fetch API แทน google.script.run
     function searchStatus() {
-      var searchKey  = document.getElementById("searchKey").value.trim();
+      var searchKey   = document.getElementById("searchKey").value.trim();
       var resultSide = document.getElementById("result-zone-side");
       var btn        = document.getElementById("searchBtn");
 
@@ -416,43 +419,48 @@
       btn.textContent = "กำลังค้นหา...";
       resultSide.style.display = "none";
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          btn.disabled    = false;
-          btn.textContent = "✦ ค้นหาสถานะงาน ✦";
-          resultSide.style.display = "block";
+      // ส่งแบบ POST ไปยัง Google Script โดยบอกว่าต้องการทำ action ตรวจสอบสถานะ
+      fetch(googleScriptUrl, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "checkCustomerStatus", key: searchKey })
+      })
+      .then(response => response.json())
+      .then(function(res) {
+        btn.disabled    = false;
+        btn.textContent = "✦ ค้นหาสถานะงาน ✦";
+        resultSide.style.display = "block";
 
-          if (res.success) {
-            var html = '';
-            res.orders.forEach(function(order) {
-              html +=
-                '<div class="order-item">' +
-                  '<div class="order-title">' + order.jobType.replace(' (', '<br>(') + '</div>' +
-                  '<div class="order-date">วันที่สั่งซื้อ: ' + order.date + '</div>' +
-                  '<div class="order-date" style="margin-bottom:10px;">ชื่อ: คุณ ' + order.name + '</div>' +
-                  '<div>สถานะงาน: <span class="status-badge" data-status="' + order.status + '">' + order.status + '</span></div>' +
-                  '<div class="queue-info">' +
-                    '🔶 ลำดับคิว: <strong>' + order.queueNumber + '</strong>' +
-                    '<br>📅 กำหนดเสร็จ: <strong>' + order.dueDate + '</strong>' +
-                  '</div>' +
-                  '<button type="button" class="see-steps-btn" onclick="showStatusModal(this)" data-status="' + order.status + '">ดูสถานะปัจจุบัน →</button>' +
-                '</div>';
-            });
-            resultSide.innerHTML = html;
-          } else {
-            resultSide.innerHTML = '<div class="error-box">⚠️ ' + res.message + '</div>';
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled    = false;
-          btn.textContent = "✦ ค้นหาสถานะงาน ✦";
-          resultSide.style.display = "block";
-          resultSide.innerHTML = '<div class="error-box">⚠️ เกิดข้อผิดพลาดของระบบ: ' + err.message + '</div>';
-        })
-        .checkCustomerStatus(searchKey);
+        if (res.success) {
+          var html = '';
+          res.orders.forEach(function(order) {
+            html +=
+              '<div class="order-item">' +
+                '<div class="order-title">' + order.jobType.replace(' (', '<br>(') + '</div>' +
+                '<div class="order-date">วันที่สั่งซื้อ: ' + order.date + '</div>' +
+                '<div class="order-date" style="margin-bottom:10px;">ชื่อ: คุณ ' + order.name + '</div>' +
+                '<div>สถานะงาน: <span class="status-badge" data-status="' + order.status + '">' + order.status + '</span></div>' +
+                '<div class="queue-info">' +
+                  '🔶 ลำดับคิว: <strong>' + order.queueNumber + '</strong>' +
+                  '<br>📅 กำหนดเสร็จ: <strong>' + order.dueDate + '</strong>' +
+                '</div>' +
+                '<button type="button" class="see-steps-btn" onclick="showStatusModal(this)" data-status="' + order.status + '">ดูสถานะปัจจุบัน →</button>' +
+              '</div>';
+          });
+          resultSide.innerHTML = html;
+        } else {
+          resultSide.innerHTML = '<div class="error-box">⚠️ ' + res.message + '</div>';
+        }
+      })
+      .catch(function(err) {
+        btn.disabled    = false;
+        btn.textContent = "✦ ค้นหาสถานะงาน ✦";
+        resultSide.style.display = "block";
+        resultSide.innerHTML = '<div class="error-box">⚠️ เกิดข้อผิดพลาดของระบบในการดึงข้อมูล</div>';
+        console.error(err);
+      });
     }
-
-  //]]>
   </script>
 
 </body>
