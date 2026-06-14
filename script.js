@@ -23,7 +23,8 @@ function sendDataToGoogleScript(nameData, emailData) {
     .then(response => response.json())
     .then(data => {
         if(data.status === "success") {
-            alert("เย้! " + data.message);
+            // เมื่อ Google บันทึกสำเร็จ จะสั่งให้เปลี่ยนหน้าไป Status.html ทันที
+            window.location.href = "Status.html";
         } else {
             alert("เกิดข้อผิดพลาด: " + data.message);
         }
