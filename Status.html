@@ -79,6 +79,25 @@
       outline: none; border-color: #ff9e7d !important;
       background-color: #ffffff; box-shadow: 0 0 5px rgba(255,158,125,0.4);
     }
+    .back-home-btn {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 14px;
+    color: #bc7d6c; /* สีตัวอักษรโทนเดียวกับปุ่มหลัก */
+    background-color: transparent;
+    border: 1px solid #bc7d6c; /* เส้นขอบบางๆ */
+    border-radius: 20px; /* ขอบมนเข้ากับดีไซน์เดิม */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* เอฟเฟกต์เมื่อเอาเมาส์ไปชี้ (Hover) */
+.back-home-btn:hover {
+    background-color: #bc7d6c;
+    color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
     .btn {
       width: 100%; padding: 13px; background: var(--ink); color: var(--white);
       border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
@@ -207,6 +226,11 @@
           <span class="radio-desc">หากไม่แน่ใจว่าใช้อีเมลใด สามารถสอบถามนักวาดได้โดยตรง</span>
           <!-- ✅ แก้ 1: เพิ่ม type="button" กัน form submit -->
           <button type="button" class="btn" id="searchBtn" onclick="searchStatus()">✦ ค้นหาสถานะงาน ✦</button>
+          <div style="text-align: center; margin-top: 15px;">
+    <a href="index.html" class="back-home-btn">
+        กลับสู่หน้าหลัก
+    </a>
+</div>
           <div id="result-zone"></div>
         </div>
 
