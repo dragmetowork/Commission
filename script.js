@@ -1,7 +1,7 @@
 // ==========================================
 // 1. ส่วนตั้งค่าส่วนกลาง (ใช้ URL เดียวกัน)
 // ==========================================
-const googleScriptUrl = "https://script.google.com/macros/s/AKfycbxBvbXELIDEVe_VkmedB7TN-YQDpiGKiOlGR4dFSPT6TOVMgjJ6O3FeD0dWV7kxX2tPOA/exec";
+const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw_Y_AyRP5ATF1lV5QMPgBEGogC_T7jN91NHrXwecT3GXFzM8WzPYBwgcAmOmEjlR6G/exec";
 
 
 // ==========================================
