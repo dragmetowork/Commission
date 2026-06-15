@@ -345,24 +345,26 @@
 
       <div class="field">
         <div class="field-label">ชื่อ–นามสกุล (หรือชื่อที่ใช้เรียก) <span class="req">*</span></div>
-        <input type="text" id="name" placeholder="เช่น ซากุระ หรือ Sakura"
+        <input type="text" id="name" placeholder="เช่น ซากุระ หรือ Sakura" maxlength="100"
           autocomplete="off" autocorrect="off" spellcheck="false"
           required pattern=".*\S.*" title="กรุณากรอกชื่อ-นามสกุล และห้ามใส่เพียงช่องว่าง" />
       </div>
 
       <div class="field">
         <div class="field-label">ช่องทางติดต่อ <span class="req">*</span></div>
-        <input type="text" id="contact" placeholder="เช่น X: @username / Facebook: username"
+        <input type="text" id="contact" placeholder="เช่น X: @username / Facebook: username" maxlength="100"
           autocomplete="off" autocorrect="off" spellcheck="false"
           required pattern=".*\S.*" title="กรุณากรอกรายละเอียด และห้ามใส่เพียงช่องว่าง" />
       </div>
 
       <div class="field">
         <div class="field-label">อีเมล <span class="req">*</span>
-          <span class="field-hint">พิมพ์เฉพาะชื่ออีเมล เช่น yourname</span>
+          <span class="field-hint">พิมพ์อีเมลให้ครบ เช่น yourname@gmail.com</span>
         </div>
-        <input type="text" id="email" placeholder="แนะนำ G-mail"
-          autocomplete="off" autocorrect="off" spellcheck="false" required onblur="autoFillGmail(this)" />
+        <input type="text" id="email" placeholder="แนะนำ G-mail" maxlength="100"
+          autocomplete="off" autocorrect="off" spellcheck="false" required
+          oninput="this.value=this.value.replace(/[^a-zA-Z0-9@._%+\-]/g,'')"
+          onblur="validateEmail(this)" />
       </div>
 
       <div class="divider">รายละเอียดงาน & คำนวณราคา</div>
@@ -475,7 +477,7 @@
         <div id="price-field" class="field" style="display:none;">
           <div class="field-label">ราคาที่คุณต้องการเสนอ (บาท) <span class="req">*</span></div>
           <input type="number" id="offeredPrice" placeholder="ระบุงบประมาณ เช่น 3500" min="1"
-            oninput="checkOfferPrice()" />
+            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10); checkOfferPrice()" />
           <!-- แจ้งเตือนราคาต่ำกว่าเรท -->
           <div id="offer-warning">
             ⚠️ ราคาที่คุณเสนอ (<span id="warn-offer">0</span> บาท) ต่ำกว่าราคาประเมินตามเรทมาตรฐาน
@@ -522,7 +524,7 @@
           กำหนดส่งงานเบื้องต้น <span class="req">*</span>
           <span class="field-hint">โปรดระบุเวลาคร่าวๆที่ต้องการ...</span>
         </div>
-        <input type="date" id="dueDate" />
+        <input type="date" id="dueDate" min="" />
       </div>
 
       <div class="field">
@@ -726,6 +728,21 @@ function submitForm() {
     return showError("กรุณากรอกข้อมูลช่องที่มีเครื่องหมาย * ให้ครบนะคะ");
   }
 
+  // ตรวจสอบรูปแบบอีเมล
+  if (!email.includes("@")) {
+    return showError("กรุณาพิมพ์อีเมลให้ครบ");
+  }
+  const domainPart = email.split("@")[1] || "";
+  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) {
+    return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
+  }
+
+  // ตรวจสอบว่าวันที่เลือกไม่เป็นวันที่ในอดีต
+  const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+  if (dueDate < todayStr) {
+    return showError("กรุณาเลือกวันที่ตั้งแต่วันนี้เป็นต้นไปนะคะ");
+  }
+
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.classList.add("loading");
@@ -766,10 +783,19 @@ function submitForm() {
     });
 }
 
-function autoFillGmail(input) {
+function validateEmail(input) {
   const value = input.value.trim();
   if (value === "") return;
-  if (!value.includes("@")) input.value = value + "@gmail.com";
+
+  if (!value.includes("@")) {
+    return showError("กรุณาพิมพ์อีเมลให้ครบ");
+  }
+
+  const domainPart = value.split("@")[1] || "";
+  // ต้องมีจุด (.) ในส่วนโดเมน และต้องมีตัวอักษรหลังจุดด้วย (เช่น .com)
+  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) {
+    return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
+  }
 }
 
 function showError(msg) {
@@ -780,6 +806,15 @@ function showError(msg) {
 }
 
 document.getElementById("submitBtn").addEventListener("click", submitForm);
+
+// จำกัดวันที่เลือกได้เฉพาะวันนี้และอนาคต
+(function setMinDueDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  document.getElementById("dueDate").min = `${yyyy}-${mm}-${dd}`;
+})();
 </script>
 
 </body>
