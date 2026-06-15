@@ -292,8 +292,7 @@
     </button>
     <div style="margin-top: 18px;">
       <a class="btn"
-         href="Status.html"
-         target="_blank">
+         href="Status.html">
         <span class="btn-text">✦ ตรวจสอบสถานะคิวงาน ✦</span>
       </a>
     </div>
@@ -361,7 +360,7 @@
         <div class="field-label">อีเมล <span class="req">*</span>
           <span class="field-hint">พิมพ์อีเมลให้ครบ เช่น yourname@gmail.com</span>
         </div>
-        <input type="text" id="email" placeholder="แนะนำ G-mail" maxlength="100"
+        <input type="text" id="email" placeholder="กรุณาพิมพ์เป็นภาษาอังกฤษเท่านั้น" maxlength="100"
           autocomplete="off" autocorrect="off" spellcheck="false" required
           oninput="this.value=this.value.replace(/[^a-zA-Z0-9@._%+\-]/g,''); document.getElementById('error-toast').classList.remove('show')"
           onblur="validateEmail(this)" />
@@ -476,7 +475,7 @@
         <!-- ช่องเสนอราคา (แสดงเฉพาะ custom_offer) -->
         <div id="price-field" class="field" style="display:none;">
           <div class="field-label">ราคาที่คุณต้องการเสนอ (บาท) <span class="req">*</span></div>
-          <input type="number" id="offeredPrice" placeholder="ระบุงบประมาณ เช่น 3500" min="1"
+          <input type="number" id="offeredPrice" placeholder="ใส่แค่ตัวเลขเท่านั้น ใส่ + หรือ - จะให้กรอกใหม่" min="1"
             oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10); checkOfferPrice()" />
           <!-- แจ้งเตือนราคาต่ำกว่าเรท -->
           <div id="offer-warning">
