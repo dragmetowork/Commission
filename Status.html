@@ -112,15 +112,27 @@
     }
     .order-title { font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
     .order-date  { font-size: 12px; color: #b0aac4; margin-bottom: 2px; }
-    .status-badge {
-      display: inline-block; padding: 4px 12px; background: #888;
-      color: white; border-radius: 999px; font-size: 13px; font-weight: 600;
+    .mini-tracker {
+      display: flex; align-items: flex-start; margin: 12px 0 4px;
     }
-    .status-badge[data-status="รอยืนยัน"]     { background: #EC5C77 !important; }
-    .status-badge[data-status="ตกลงรับงาน"]   { background: #66BCD1 !important; }
-    .status-badge[data-status="ส่งภาพร่าง"]   { background: #F0C16F !important; }
-    .status-badge[data-status="ชำระเงินแล้ว"] { background: #B2DF6A !important; }
-    .status-badge[data-status="ส่งงานแล้ว"]   { background: #DF9682 !important; }
+    .mini-step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; min-width: 0;
+    }
+    .mini-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .mini-line {
+      height: 2px; flex: 1; margin-top: 11px;
+      min-width: 8px;
+    }
+    .mini-step-label {
+      font-size: 10px; color: #aaa; text-align: center;
+      margin-top: 4px; line-height: 1.3; font-weight: 600;
+    }
+    .mini-step-label.active { color: var(--rose); }
     .queue-info {
       margin-top: 8px; font-size: 13px; color: #555;
       background: #f0f0f0; padding: 6px 10px; border-radius: 6px;
@@ -149,35 +161,6 @@
     .step-text  { padding-top: 3px; }
     .step-label { font-size: 12px; font-weight: 600; color: #333; }
     .step-desc  { font-size: 10px; color: #aaa; margin-top: 1px; }
-    .see-steps-btn {
-      margin-top: 10px; background: none; border: none;
-      color: #f97316; font-size: 13px; cursor: pointer;
-      padding: 0; text-decoration: underline;
-      font-family: 'Sarabun', sans-serif;
-    }
-    #statusModal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4); z-index: 9999;
-      align-items: center; justify-content: center;
-    }
-    .modal-box {
-      background: #fff; border-radius: 16px; padding: 28px 24px;
-      width: 90%; max-width: 360px; position: relative;
-    }
-    .modal-close {
-      position: absolute; top: 12px; right: 16px;
-      background: none; border: none; font-size: 20px;
-      cursor: pointer; color: #aaa;
-    }
-    .modal-title { margin: 0 0 20px; font-size: 16px; color: #333; font-weight: 700; }
-    .modal-step-row  { display: flex; gap: 14px; align-items: flex-start; }
-    .modal-step-col  { display: flex; flex-direction: column; align-items: center; }
-    .modal-step-circle {
-      width: 28px; height: 28px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; flex-shrink: 0;
-    }
-    .modal-step-line { width: 2px; height: 32px; background: #e5e7eb; }
   </style>
 </head>
 <body>
@@ -302,14 +285,6 @@
       <div id="result-zone-side" style="display:none;"></div>
     </div>
 
-  </div>
-
-  <div id="statusModal" onclick="if(event.target===this)this.style.display='none'">
-    <div class="modal-box">
-      <button type="button" class="modal-close" onclick="document.getElementById('statusModal').style.display='none'">✕</button>
-      <div class="modal-title">ขั้นตอนการดำเนินงาน</div>
-      <div id="modalSteps"></div>
-    </div>
   </div>
 
   <script src="script.js"></script>
