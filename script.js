@@ -105,6 +105,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
   }
 });
 
+if (action === "getBusyLevel") {
+  var config = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Config");
+  var level = config.getRange("B5").getValue();
+  return ContentService.createTextOutput(
+    JSON.stringify({ level: level })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
 // ฟังก์ชันค้นหาสถานะคิวงานผ่านอีเมล
 function searchStatus() {
   var searchKey   = document.getElementById("searchKey").value.trim();
