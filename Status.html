@@ -235,6 +235,42 @@
     .wait-row-label { font-size: 11px; color: #c8a4b0; font-weight: 600; }
     .wait-row-val { font-size: 13px; font-weight: 700; color: #a05070; margin-left: auto; }
     .radio-desc { font-size: 12px; color: #C3A4A9; font-weight: 400; display: block; margin-top: 2px; }
+    .busy-card {
+      background: #fff8f6; border: 1.5px solid #f5cfc7;
+      border-radius: 16px; padding: 16px 18px 14px;
+      margin-bottom: 20px; position: relative; overflow: hidden;
+    }
+    .busy-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #f4a89a, #e8b4c8, #f4a89a);
+      border-radius: 16px 16px 0 0;
+    }
+    .busy-title {
+      font-size: 11px; font-weight: 700; color: #c8a4a0;
+      letter-spacing: 0.04em; margin-bottom: 10px;
+    }
+    .busy-gauge {
+      display: flex; border-radius: 12px; overflow: hidden;
+      height: 36px; gap: 2px; background: #f5ebe8; padding: 3px;
+    }
+    .busy-seg {
+      flex: 1; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      opacity: 0.2; transition: opacity 0.4s;
+    }
+    .busy-seg.active { opacity: 1; }
+    .busy-seg.passed { opacity: 0.5; }
+    .bs1 { background: #5DCAA5; color: #085041; }
+    .bs2 { background: #EF9F27; color: #412402; }
+    .bs3 { background: #D85A30; color: #4A1B0C; }
+    .bs4 { background: #E24B4A; color: #501313; }
+    .busy-status {
+      margin-top: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .busy-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .busy-label { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .busy-sub { font-size: 11px; color: #c8a4a0; margin-top: 1px; }
     .timeline-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 16px; }
     .step-row  { display: flex; gap: 12px; align-items: flex-start; }
     .step-col  { display: flex; flex-direction: column; align-items: center; }
@@ -261,11 +297,24 @@
             <img src="https://media.tenor.com/cd-Tnw2IxD0AAAAm/hachiware-dance.webp"
                  alt="banner" style="width:150px; height:auto ; border-radius:12px;">
           </div>
-          <div>
-    <img src="https://drive.google.com/thumbnail?id=1Dr6zUTCE_1RGxq8Vz7QV8TG0nz0cNLXY&sz=w300"
-         alt="รูปบรีฟงาน" style="width:300px; height:auto; border-radius:8px;" />
-</div>
         </header>
+
+        <div class="busy-card" id="busy-card">
+          <div class="busy-title">🌡️ ระดับความเดือดของงานช่วงนี้</div>
+          <div class="busy-gauge">
+            <div class="busy-seg bs1" id="bs1">ปกติ</div>
+            <div class="busy-seg bs2" id="bs2">ยุ่ง</div>
+            <div class="busy-seg bs3" id="bs3">เดือด</div>
+            <div class="busy-seg bs4" id="bs4">เดือดมาก</div>
+          </div>
+          <div class="busy-status">
+            <div class="busy-dot" id="busy-dot"></div>
+            <div>
+              <div class="busy-label" id="busy-label">กำลังโหลด...</div>
+              <div class="busy-sub" id="busy-sub"></div>
+            </div>
+          </div>
+        </div>
 
         <div class="queue-banner" id="queue-banner">
           <div class="queue-banner-title">🎀 สถานะคิวปัจจุบัน</div>
@@ -277,7 +326,7 @@
                 <span class="q-chip-val" id="q-normal">—</span>
               </div>
               <div class="q-chip">
-                <span class="q-chip-label">✨ Custom</span>
+                <span class="q-chip-label">✨ เสนอราคา</span>
                 <span class="q-chip-val" id="q-custom">—</span>
               </div>
             </div>
@@ -285,12 +334,6 @@
               <span>📅</span>
               <span>กำหนดส่งคิวสุดท้าย: <strong id="q-due">—</strong></span>
             </div>
-            <span id="q-slots-wrap">
-              <span id="q-slots-badge" class="slots-badge ok">
-                <span>🟢</span>
-                <span>คิวปกติที่เหลือ: <span id="q-slots"></span> ช่อง</span>
-              </span>
-            </span>
             <div class="wait-box" id="q-wait-wrap">
               <div class="wait-box-title">⏳ เวลารอโดยประมาณสำหรับการเปิดรับคิวปกติรอบใหม่</div>
               <div class="wait-box-body">
@@ -413,6 +456,31 @@
       });
       observer.observe(slotsEl, { childList: true, characterData: true, subtree: true });
     }
+
+    const busyData = {
+      1: { label: 'ปกติ',      sub: 'รับคิวได้ตามปกติค่ะ',               dot: '#1D9E75' },
+      2: { label: 'ยุ่ง',       sub: 'คิวเริ่มเยอะ อาจใช้เวลานานขึ้น',    dot: '#BA7517' },
+      3: { label: 'เดือด',      sub: 'คิวเกือบเต็ม รับได้จำนวนมาก',   dot: '#993C1D' },
+      4: { label: 'เดือดมาก',   sub: 'ปิดรับคิวชั่วคราว โปรดติดตามประกาศ', dot: '#A32D2D' }
+    };
+
+    function renderBusyLevel(level) {
+      const n = parseInt(level) || 1;
+      const d = busyData[n] || busyData[1];
+      [1,2,3,4].forEach(function(i) {
+        const el = document.getElementById('bs' + i);
+        if (!el) return;
+        el.className = 'busy-seg bs' + i + (i === n ? ' active' : i < n ? ' passed' : '');
+      });
+      document.getElementById('busy-label').textContent = d.label;
+      document.getElementById('busy-sub').textContent   = d.sub;
+      document.getElementById('busy-dot').style.background = d.dot;
+    }
+
+    fetch(googleScriptUrl + "?action=getBusyLevel", { redirect: "follow" })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { renderBusyLevel(data.level); })
+      .catch(function() { renderBusyLevel(1); });
   </script>
 
 </body>
