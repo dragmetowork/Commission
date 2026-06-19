@@ -721,19 +721,14 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBvbXELIDEVe_VkmedB7TN-YQDpiGKiOlGR4dFSPT6TOVMgjJ6O3FeD0dWV7kxX2tPOA/exec";
-const SUPABASE_URL = "https://dbkjnjuiofkfvhvbigbv.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRia2puanVpb2ZrZnZodmJpZ2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NzE5MjQsImV4cCI6MjA5NzI0NzkyNH0.q6cSdDS0mPdIgmZPqf7WQJkTeY01vxzFyPUBhiPM94o";
 const RECAPTCHA_SITE_KEY = "6Lf93iMtAAAAAMDvz7fS33Lz8a3Wf91iKX1pPsJf";
 const BRIEF_ALLOWED_DOMAINS = ["docs.google.com","drive.google.com","notion.so","notion.site","canva.com","figma.com","dropbox.com","onedrive.live.com","1drv.ms"];
+
 function validateBriefLink(url) {
   try { const u = new URL(url); return BRIEF_ALLOWED_DOMAINS.some(d => u.hostname === d || u.hostname.endsWith("." + d)); }
   catch { return false; }
 }
 
-// ==========================================
-// ระบบเปิด-ปิดฟอร์ม: กำหนดวัน-เวลาที่จะเปิดรับ
-// รูปแบบ: "YYYY-MM-DDTHH:MM:SS" (เวลาตามเครื่องผู้ใช้)
-// ==========================================
 const OPEN_AT = new Date("2026-06-19T18:00:00");
 
 function checkFormOpen() {
@@ -749,10 +744,9 @@ function checkFormOpen() {
   return true;
 }
 
-// ตัวจับเวลานับถอยหลัง: ปลดล็อกปุ่มส่งอัตโนมัติเมื่อถึงเวลาเปิดรับ
 function startCountdown() {
-  const btn     = document.getElementById("submitBtn");
-  const banner  = document.getElementById("countdown-banner");
+  const btn    = document.getElementById("submitBtn");
+  const banner = document.getElementById("countdown-banner");
 
   function tick() {
     const now  = new Date();
@@ -787,24 +781,20 @@ function startCountdown() {
   const timer = setInterval(tick, 1000);
 }
 
-// เก็บราคาปัจจุบันที่คำนวณได้ (ใช้เปรียบเทียบกับราคาที่เสนอ)
 let currentCalcPrice = 0;
 
 function updateCalculator() {
   const orderType = document.getElementById("orderType").value;
-  const calcZone = document.getElementById("calculator-zone");
+  const calcZone  = document.getElementById("calculator-zone");
   const priceField = document.getElementById("price-field");
 
   if (!orderType) return;
 
-  // แสดง calculator-zone เสมอ (ทั้ง normal และ custom_offer)
   calcZone.style.display = "block";
 
-  // แสดงช่องเสนอราคาเฉพาะ custom_offer
   if (orderType === "custom_offer") {
     priceField.style.display = "block";
     document.getElementById("offeredPrice").required = true;
-    // เปิด modal เฉพาะครั้งแรกที่เลือก custom_offer
     if (!document.getElementById("customOfferModal").dataset.shown) {
       document.getElementById("customOfferModal").classList.add("active");
       document.getElementById("customOfferModal").dataset.shown = "1";
@@ -815,7 +805,7 @@ function updateCalculator() {
     document.getElementById("offer-warning").classList.remove("show");
   }
 
-  const jobType = document.getElementById("jobType").value;
+  const jobType   = document.getElementById("jobType").value;
   if (!jobType) return;
 
   const charCount = parseInt(document.getElementById("charCount").value) || 1;
@@ -831,7 +821,7 @@ function updateCalculator() {
   updateAddonDescriptions(jobType, charCount);
 
   let basePrice = 0;
-  if (jobType === "bust_bw")       basePrice = charCount === 1 ? 1500 : 3000;
+  if (jobType === "bust_bw")        basePrice = charCount === 1 ? 1500 : 3000;
   else if (jobType === "bust_color")  basePrice = charCount === 1 ? 3500 : 6000;
   else if (jobType === "waist_bw")    basePrice = charCount === 1 ? 3000 : 6000;
   else if (jobType === "waist_color") basePrice = 8000;
@@ -862,19 +852,17 @@ function updateCalculator() {
   document.getElementById("calc-price-box").style.display = "block";
   document.getElementById("total-price").textContent = currentCalcPrice.toLocaleString();
 
-  // อัปเดตคำเตือนถ้ากำลังอยู่ใน custom_offer
   if (orderType === "custom_offer") checkOfferPrice();
   updateSummary();
 }
 
-// ตรวจสอบราคาที่เสนอ vs ราคาที่คำนวณ
 function checkOfferPrice() {
   const offerVal = parseInt(document.getElementById("offeredPrice").value) || 0;
-  const warning = document.getElementById("offer-warning");
+  const warning  = document.getElementById("offer-warning");
 
   if (currentCalcPrice > 0 && offerVal > 0 && offerVal < currentCalcPrice) {
     document.getElementById("warn-offer").textContent = offerVal.toLocaleString();
-    document.getElementById("warn-base").textContent = currentCalcPrice.toLocaleString();
+    document.getElementById("warn-base").textContent  = currentCalcPrice.toLocaleString();
     warning.classList.add("show");
   } else {
     warning.classList.remove("show");
@@ -907,33 +895,18 @@ function updateAddonDescriptions(jobType, charCount) {
   }
 }
 
-function submitForm() {
+async function submitForm() {
   if (!checkFormOpen()) return;
-
-  const idsToCheck = [
-    "error-toast", "orderType", "offeredPrice", "jobType",
-    "add_fullbody", "add_fantasy", "add_bg", "add_extra_char", "add_horizontal",
-    "name", "contact", "email", "briefLink", "details", "dueDate",
-    "total-price", "submitBtn"
-  ];
-  const missing = idsToCheck.filter(id => document.getElementById(id) === null);
-  if (missing.length > 0) {
-    alert("พบปัญหา: ไม่พบช่อง id = " + missing.join(", "));
-    return;
-  }
 
   document.getElementById("error-toast").classList.remove("show");
 
   const orderType = document.getElementById("orderType").value;
   if (!orderType) return showError("กรุณาเลือกรูปแบบการสั่งงานด้วยนะคะ");
 
-  let jobTypeText = "";
-  let finalPriceToSend = "";
-
   const selectEl = document.getElementById("jobType");
   if (!selectEl.value) return showError("กรุณาเลือกประเภทงานด้วยนะคะ");
 
-  const charCountEl = document.getElementById("charCount");
+  const charCountEl      = document.getElementById("charCount");
   const charCountVisible = document.getElementById("char-count-field").style.display !== "none";
   if (charCountVisible && !charCountEl.value) return showError("กรุณาเลือกจำนวนตัวละครด้วยนะคะ");
 
@@ -946,9 +919,11 @@ function submitForm() {
   if (document.getElementById("add_extra_char").checked && selectEl.value === "couple_color") selectedAddons.push("เพิ่มตัวละคร");
   if (document.getElementById("add_horizontal").checked && selectEl.value === "couple_color") selectedAddons.push("ภาพแนวนอน");
 
-  const addonString = selectedAddons.length > 0 ? ` [ออปชันเสริม: ${selectedAddons.join(", ")}]` : "";
-  jobTypeText = selectEl.options[selectEl.selectedIndex].text + charCountText + addonString;
+  const addonString  = selectedAddons.length > 0 ? ` [ออปชันเสริม: ${selectedAddons.join(", ")}]` : "";
+  const jobTypeText  = selectEl.options[selectEl.selectedIndex].text + charCountText + addonString;
+  const charCountVal = charCountVisible ? charCountEl.value : "-";
 
+  let finalPriceToSend = "";
   if (orderType === "custom_offer") {
     const offerVal = parseInt(document.getElementById("offeredPrice").value) || 0;
     if (!offerVal || offerVal < 1) return showError("กรุณาระบุราคาที่ต้องการเสนอด้วยนะคะ");
@@ -957,146 +932,98 @@ function submitForm() {
     finalPriceToSend = document.getElementById("total-price").textContent + " บาท";
   }
 
-  const charCountVal = charCountVisible ? charCountEl.value : "-";
-
-  const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
-  const email = document.getElementById("email").value.trim();
+  const name      = document.getElementById("name").value.trim();
+  const contact   = document.getElementById("contact").value.trim();
+  const email     = document.getElementById("email").value.trim();
   const briefLink = document.getElementById("briefLink").value.trim();
-  const details = document.getElementById("details").value.trim();
-  const dueDate = document.getElementById("dueDate").value;
+  const details   = document.getElementById("details").value.trim();
+  const dueDate   = document.getElementById("dueDate").value;
 
   const publishRuleEl = document.querySelector('input[name="publishRule"]:checked');
-  const publishRule = publishRuleEl ? publishRuleEl.value : "โพสต์ได้ตามปกติ";
+  const publishRule   = publishRuleEl ? publishRuleEl.value : "โพสต์ได้ตามปกติ";
 
   if (!name || !contact || !email || !briefLink || !dueDate) {
     return showError("กรุณากรอกข้อมูลช่องที่มีเครื่องหมาย * ให้ครบนะคะ");
   }
 
-  // ตรวจสอบรูปแบบอีเมล
-  if (!email.includes("@")) {
-    return showError("กรุณาพิมพ์อีเมลให้ครบ");
-  }
+  if (!email.includes("@")) return showError("กรุณาพิมพ์อีเมลให้ครบ");
   const domainPart = email.split("@")[1] || "";
-  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) {
-    return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
-  }
+  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
 
-  // ตรวจสอบ domain ลิ้งค์บรีฟ
   if (!validateBriefLink(briefLink)) {
     return showError("กรุณาใส่ลิ้งค์บรีฟจาก Google Docs, Google Drive, Notion, Canva หรือ Figma เท่านั้นนะคะ");
   }
 
-  // ตรวจสอบวันที่
   const todayStr = new Date().toLocaleDateString("en-CA");
-  if (dueDate < todayStr) {
-    return showError("กรุณาเลือกวันที่ตั้งแต่วันนี้เป็นต้นไปนะคะ");
-  }
+  if (dueDate < todayStr) return showError("กรุณาเลือกวันที่ตั้งแต่วันนี้เป็นต้นไปนะคะ");
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.classList.add("loading");
   btn.querySelector(".btn-text").textContent = "กำลังตรวจสอบ...";
 
-  grecaptcha.ready(async () => {
-    let recaptchaScore = null;
-    try {
-      const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "submit_commission" });
-      const verifyRes = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "verify_recaptcha", token })
-      }).then(r => r.json()).catch(() => ({ score: null }));
-      recaptchaScore = verifyRes.score ?? null;
-      if (recaptchaScore !== null && recaptchaScore < 0.4) {
-        btn.disabled = false;
-        btn.classList.remove("loading");
-        btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
-        return showError("ระบบตรวจพบพฤติกรรมผิดปกติ กรุณาลองใหม่อีกครั้งนะคะ");
-      }
-    } catch(e) { recaptchaScore = null; }
+  // ขั้นที่ 1: reCAPTCHA
+  let recaptchaToken = null;
+  try {
+    await new Promise(resolve => grecaptcha.ready(resolve));
+    recaptchaToken = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "submit_commission" });
+  } catch(e) {
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
+    return showError("ไม่สามารถตรวจสอบ reCAPTCHA ได้ กรุณาลองใหม่อีกครั้งนะคะ");
+  }
 
-    btn.querySelector(".btn-text").textContent = "กำลังลงทะเบียนคิว...";
+  // ขั้นที่ 2: ส่ง Google Apps Script (เช็คคิว + บันทึก Sheets + ตรวจ reCAPTCHA)
+  btn.querySelector(".btn-text").textContent = "กำลังตรวจสอบคิว...";
+  try {
+    const sheetRes = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        orderType,
+        offeredPrice: finalPriceToSend,
+        name, contact, email,
+        jobType: jobTypeText,
+        charCount: charCountVal,
+        briefLink, details, publishRule, dueDate,
+        recaptchaToken  // ส่ง token ไปให้ Apps Script ตรวจสอบ
+      })
+    }).then(r => r.json());
 
-    // ตรวจอีเมลซ้ำภายใน 1 ชั่วโมง
-    try {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const dupCheck = await fetch(
-        `${SUPABASE_URL}/rest/v1/commission_submissions?email=eq.${encodeURIComponent(email)}&created_at=gte.${oneHourAgo}&select=id&limit=1`,
-        { headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY } }
-      ).then(r => r.json());
-      if (Array.isArray(dupCheck) && dupCheck.length > 0) {
-        btn.disabled = false;
-        btn.classList.remove("loading");
-        btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
-        return showError("อีเมลนี้เพิ่งส่งคำขอไปแล้วในช่วงชั่วโมงที่ผ่านมานะคะ กรุณารอสักครู่แล้วลองใหม่ค่ะ");
-      }
-    } catch(e) { /* ถ้าเช็คไม่ได้ให้ผ่านไปก่อน */ }
-
-    // บันทึกลง Supabase (server-side timestamp)
-    try {
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/commission_submissions`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({
-          order_type: orderType, job_type: jobTypeText, char_count: charCountVal,
-          name, contact, email, brief_link: briefLink,
-          offered_price: finalPriceToSend, publish_rule: publishRule,
-          due_date: dueDate, details, recaptcha_score: recaptchaScore
-        })
-      });
-      if (!insertRes.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ: " + insertRes.status);
-    } catch(e) {
+    if (!sheetRes.success) {
       btn.disabled = false;
       btn.classList.remove("loading");
       btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
-      return showError("ระบบขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้งนะคะ: " + e.message);
+      return showError(sheetRes.message || "ไม่สามารถบันทึกข้อมูลได้");
     }
-
-    // ส่งไป Google Sheets เหมือนเดิม (สำรอง)
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        orderType, offeredPrice: finalPriceToSend, name, contact, email,
-        jobType: jobTypeText, charCount: charCountVal,
-        briefLink, details, publishRule, dueDate
-      })
-    }).catch(() => {});
-
+  } catch(e) {
     btn.disabled = false;
     btn.classList.remove("loading");
-    btn.querySelector(".btn-text").textContent = "ส่งคำขอ ✦";
-    document.getElementById("form-wrap").querySelectorAll("input, select, textarea").forEach(el => el.value = "");
-    document.querySelectorAll("input[type=checkbox]").forEach(el => el.checked = false);
-    currentCalcPrice = 0;
-    document.getElementById("calculator-zone").style.display = "none";
-    document.getElementById("offer-warning").classList.remove("show");
-    delete document.getElementById("customOfferModal").dataset.shown;
-    const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    toast.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
+    btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
+    return showError("ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้งนะคะ");
+  }
+
+  // สำเร็จ
+  btn.disabled = false;
+  btn.classList.remove("loading");
+  btn.querySelector(".btn-text").textContent = "✦ ส่งคำขอ ✦";
+  document.getElementById("form-wrap").querySelectorAll("input, select, textarea").forEach(el => el.value = "");
+  document.querySelectorAll("input[type=checkbox]").forEach(el => el.checked = false);
+  currentCalcPrice = 0;
+  document.getElementById("calculator-zone").style.display = "none";
+  document.getElementById("offer-warning").classList.remove("show");
+  delete document.getElementById("customOfferModal").dataset.shown;
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  toast.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function validateEmail(input) {
   const value = input.value.trim();
   if (value === "") return;
-
-  if (!value.includes("@")) {
-    return showError("กรุณาพิมพ์อีเมลให้ครบ");
-  }
-
+  if (!value.includes("@")) return showError("กรุณาพิมพ์อีเมลให้ครบ");
   const domainPart = value.split("@")[1] || "";
-  // ต้องมีจุด (.) ในส่วนโดเมน และต้องมีตัวอักษรหลังจุดด้วย (เช่น .com)
-  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) {
-    return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
-  }
-
-  // อีเมลถูกต้องแล้ว ซ่อนคำเตือน
+  if (!/\.[a-zA-Z]{2,}$/.test(domainPart)) return showError("กรุณาพิมพ์นามสกุลโดเมนของอีเมลให้ครบ เช่น .com");
   document.getElementById("error-toast").classList.remove("show");
 }
 
@@ -1109,16 +1036,14 @@ function showError(msg) {
 
 document.getElementById("submitBtn").addEventListener("click", submitForm);
 
-// จำกัดวันที่เลือกได้เฉพาะวันนี้และอนาคต
 (function setMinDueDate() {
-  const d = new Date();
+  const d    = new Date();
   const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
+  const mm   = String(d.getMonth() + 1).padStart(2, "0");
+  const dd   = String(d.getDate()).padStart(2, "0");
   document.getElementById("dueDate").min = `${yyyy}-${mm}-${dd}`;
 })();
 
-// เริ่มตัวจับเวลานับถอยหลัง (จะปลดล็อกปุ่มอัตโนมัติเมื่อถึงเวลา)
 startCountdown();
 
 // ── กล่องสรุปข้อมูลเรียลไทม์ ──
@@ -1142,7 +1067,6 @@ function updateSummary() {
   const publishRuleEl = document.querySelector('input[name="publishRule"]:checked');
   const publishRule = publishRuleEl?.value || '';
 
-  // addons
   const addons = [];
   if (document.getElementById('add_fullbody')?.checked) addons.push('เต็มตัว (Full Body)');
   if (document.getElementById('add_fantasy')?.checked)  addons.push('แฟนตาซี/ดีเทลเยอะ');
@@ -1150,7 +1074,6 @@ function updateSummary() {
   if (document.getElementById('add_extra_char')?.checked) addons.push('เพิ่มตัวละคร (+5,000)');
   if (document.getElementById('add_horizontal')?.checked) addons.push('ภาพแนวนอน (+5,000)');
 
-  // ราคา
   let priceText = '';
   if (orderType === 'normal' && currentCalcPrice > 0) {
     priceText = currentCalcPrice.toLocaleString() + ' บาท (ตามเรท)';
@@ -1159,10 +1082,8 @@ function updateSummary() {
     priceText = offerVal > 0 ? offerVal.toLocaleString() + ' บาท (เสนอเอง)' : '';
   }
 
-  // แปลง orderType label
   const orderLabel = orderType === 'normal' ? 'คิวปกติ (ตามเรท)' : orderType === 'custom_offer' ? 'เสนอราคาเอง' : '';
 
-  // แปลง dueDate
   let dueDateDisplay = '';
   if (dueDate) {
     const d = new Date(dueDate + 'T00:00:00');
@@ -1184,7 +1105,6 @@ function updateSummary() {
     { key: 'หมายเหตุ',        val: details || null, truncate: true },
   ].filter(r => r.val !== null);
 
-  // ตรวจว่ามีข้อมูลจริงมั้ย
   const hasAny = rows.some(r => r.val);
   if (!hasAny) {
     body.innerHTML = '<div class="sum-empty">เริ่มกรอกข้อมูลเพื่อดูสรุปที่นี่ค่ะ ✦</div>';
@@ -1193,12 +1113,7 @@ function updateSummary() {
 
   body.innerHTML = rows.map(r => {
     const isTruncate = r.truncate && r.val && r.val.length > 60;
-    const cls = [
-      'sum-val',
-      r.isPrice ? 'price' : '',
-      !r.val ? 'empty' : '',
-      isTruncate ? 'truncate' : ''
-    ].filter(Boolean).join(' ');
+    const cls = ['sum-val', r.isPrice ? 'price' : '', !r.val ? 'empty' : '', isTruncate ? 'truncate' : ''].filter(Boolean).join(' ');
     const titleAttr = isTruncate ? ` title="${r.val.replace(/"/g, '&quot;')}"` : '';
     return `
     <div class="sum-row">
@@ -1208,7 +1123,6 @@ function updateSummary() {
   }).join('');
 }
 
-// ── ผูก event listeners ทุก field กับ updateSummary ──
 (function wireUpSummary() {
   const ids = ['name','contact','email','briefLink','details','dueDate','offeredPrice','orderType','jobType','charCount'];
   ids.forEach(id => {
@@ -1217,15 +1131,10 @@ function updateSummary() {
     el.addEventListener('input', updateSummary);
     el.addEventListener('change', updateSummary);
   });
-  // radio publishRule
-  document.querySelectorAll('input[name="publishRule"]').forEach(el => {
-    el.addEventListener('change', updateSummary);
-  });
-  // checkboxes addons
+  document.querySelectorAll('input[name="publishRule"]').forEach(el => el.addEventListener('change', updateSummary));
   ['add_fullbody','add_fantasy','add_bg','add_extra_char','add_horizontal'].forEach(id => {
     document.getElementById(id)?.addEventListener('change', updateSummary);
   });
-  // initial render
   updateSummary();
 })();
 </script>
