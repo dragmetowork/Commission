@@ -567,7 +567,7 @@
               <option value="bust_bw">Black & White (อกขึ้นไป)</option>
               <option value="bust_color">Full Color (อกขึ้นไป)</option>
               <option value="waist_bw">Black & White (สะโพกขึ้นไป - เต็มตัว)</option>
-              <option value="waist_color">Novel Cover 1 ตัวละคร (สะโพกขึ้นไป - เต็มตัว)</option>
+              <option value="waist_color">Full Color (สะโพกขึ้นไป - เต็มตัว)</option>
               <option value="couple_color">Novel Cover 2 ตัวละคร (สะโพกขึ้นไป - เต็มตัว)</option>
               <option value="sd_chibi">Chibi (Chibi)</option>
             </select>
@@ -860,7 +860,7 @@ function updateCalculator() {
   const charCount = parseInt(document.getElementById("charCount").value) || 1;
 
   document.getElementById("char-count-field").style.display =
-    (jobType === "bust_bw" || jobType === "bust_color" || jobType === "waist_bw") ? "block" : "none";
+    (jobType === "bust_bw" || jobType === "bust_color" || jobType === "waist_bw" || jobType === "waist_color") ? "block" : "none";
   document.getElementById("addons-field").style.display = "block";
   document.getElementById("section-scale").style.display =
     (jobType === "waist_bw" || jobType === "waist_color") ? "block" : "none";
@@ -873,7 +873,7 @@ function updateCalculator() {
   if (jobType === "bust_bw")        basePrice = charCount === 1 ? 1500 : 3000;
   else if (jobType === "bust_color")  basePrice = charCount === 1 ? 3500 : 6000;
   else if (jobType === "waist_bw")    basePrice = charCount === 1 ? 3000 : 6000;
-  else if (jobType === "waist_color") basePrice = 8000;
+  else if (jobType === "waist_color") basePrice = charCount === 1 ? 8000 : 16000;
   else if (jobType === "couple_color") basePrice = 20000;
   else if (jobType === "sd_chibi")    basePrice = 1000;
 
@@ -881,13 +881,14 @@ function updateCalculator() {
   if (document.getElementById("add_fantasy").checked) {
     if (jobType === "bust_bw") addonPrice += 500;
     else if (jobType === "bust_color") addonPrice += (charCount === 1 ? 1500 : 2000);
-    else if (jobType === "waist_bw" || jobType === "waist_color") addonPrice += 2000;
+    else if (jobType === "waist_bw") addonPrice += 2000;
+    else if (jobType === "waist_color") addonPrice += (2000 * charCount);
     else if (jobType === "couple_color") addonPrice += 5000;
     else if (jobType === "sd_chibi") addonPrice += 750;
   }
   if (document.getElementById("add_fullbody").checked) {
     if (jobType === "waist_bw") addonPrice += (1000 * charCount);
-    else if (jobType === "waist_color") addonPrice += 2000;
+    else if (jobType === "waist_color") addonPrice += (2000 * charCount);
   }
   if (document.getElementById("add_bg").checked) {
     if (jobType === "bust_color" || jobType === "bust_bw") addonPrice += 500;
@@ -936,7 +937,9 @@ function updateAddonDescriptions(jobType, charCount) {
     fbDesc.textContent = `+${(1000 * charCount).toLocaleString()} บาท`;
     ftDesc.textContent = "+2,000 บาท"; bgDesc.textContent = "+1,000 บาท";
   } else if (jobType === "waist_color") {
-    fbDesc.textContent = "+2,000 บาท"; ftDesc.textContent = "+2,000 บาท"; bgDesc.textContent = "+2,500 บาท";
+    fbDesc.textContent = `+${(2000 * charCount).toLocaleString()} บาท`;
+    ftDesc.textContent = `+${(2000 * charCount).toLocaleString()} บาท`;
+    bgDesc.textContent = "+2,500 บาท";
   } else if (jobType === "couple_color") {
     ftDesc.textContent = "+5,000 บาท"; bgDesc.textContent = "+2,500 บาท";
   } else if (jobType === "sd_chibi") {
