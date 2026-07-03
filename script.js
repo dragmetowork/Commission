@@ -100,7 +100,8 @@ window.addEventListener('DOMContentLoaded', function() {
                 document.getElementById("queue-content").style.display = "block";
  
                 document.getElementById("q-normal").textContent = info.commissionCount + " / " + info.maxCommissionQueue;
-                document.getElementById("q-custom").textContent = info.customCount + " คิว";
+                document.getElementById("q-custom-pending").textContent  = (info.customPendingCount || 0) + " คิว";
+                document.getElementById("q-custom-accepted").textContent = (info.customAcceptedCount || 0) + " คิว";
                 document.getElementById("q-due").textContent    = info.lastDueDate;
  
                 var slotsWrap = document.getElementById("q-slots-wrap");
