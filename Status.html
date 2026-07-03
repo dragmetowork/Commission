@@ -84,6 +84,9 @@
     .queue-banner-loading { color: #ccc; font-size: 13px; }
     .queue-banner-content { display: none; }
     .slots-full { color: #c0392b; font-weight: 700; }
+    .q-grid-full {
+      margin-bottom: 8px;
+    }
     .q-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -328,14 +331,20 @@
           <div class="queue-banner-title">► สถานะคิวปัจจุบัน</div>
           <div class="queue-banner-loading" id="queue-loading">กำลังโหลด...</div>
           <div class="queue-banner-content" id="queue-content">
-            <div class="q-grid">
+            <div class="q-grid-full">
               <div class="q-chip">
                 <span class="q-chip-label">🎨 คิวปกติ</span>
                 <span class="q-chip-val" id="q-normal">—</span>
               </div>
+            </div>
+            <div class="q-grid">
               <div class="q-chip">
-                <span class="q-chip-label">✨ เสนอราคา</span>
-                <span class="q-chip-val" id="q-custom">—</span>
+                <span class="q-chip-label">✨ เสนอราคา (รอตรวจสอบ)</span>
+                <span class="q-chip-val" id="q-custom-pending">—</span>
+              </div>
+              <div class="q-chip">
+                <span class="q-chip-label">✅ เสนอราคา (ตกลงรับ)</span>
+                <span class="q-chip-val" id="q-custom-accepted">—</span>
               </div>
             </div>
             <div class="q-due-chip">
