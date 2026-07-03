@@ -1,7 +1,7 @@
 // ==========================================
 // 1. ส่วนตั้งค่าส่วนกลาง (ใช้ URL เดียวกัน)
 // ==========================================
-const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw_Y_AyRP5ATF1lV5QMPgBEGogC_T7jN91NHrXwecT3GXFzM8WzPYBwgcAmOmEjlR6G/exec";
+const googleScriptUrl = "https://script.google.com/macros/s/AKfycbyyMG9uFpdSr8XV-C4WHMdUDj7LjLDYEJkxmNj0GNibX8LyS1nKYsYQ6ES2kpIyp7kzag/exec";
  
 // ==========================================
 // 2. โค้ดสำหรับหน้าแรก (index.html) - ส่งข้อมูลคอมมิชชั่น
