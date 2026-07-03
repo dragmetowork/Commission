@@ -1,7 +1,7 @@
 // ==========================================
 // 1. ส่วนตั้งค่าส่วนกลาง (ใช้ URL เดียวกัน)
 // ==========================================
-const googleScriptUrl = "https://script.google.com/macros/s/AKfycbyyMG9uFpdSr8XV-C4WHMdUDj7LjLDYEJkxmNj0GNibX8LyS1nKYsYQ6ES2kpIyp7kzag/exec";
+const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw_Y_AyRP5ATF1lV5QMPgBEGogC_T7jN91NHrXwecT3GXFzM8WzPYBwgcAmOmEjlR6G/exec";
  
 // ==========================================
 // 2. โค้ดสำหรับหน้าแรก (index.html) - ส่งข้อมูลคอมมิชชั่น
@@ -84,18 +84,17 @@ window.addEventListener('DOMContentLoaded', function() {
         if (dotEl)   dotEl.style.background = d.dot;
     }
  
-    if (document.getElementById('busy-label')) {
-        fetch(googleScriptUrl + "?action=getBusyLevel", { redirect: "follow" })
+    // --- ดึงข้อมูลระดับความยุ่ง + ข้อมูลคิว ในการเรียกครั้งเดียว (ลดรอบ fetch) ---
+    if (document.getElementById('busy-label') || document.getElementById("queue-loading")) {
+        fetch(googleScriptUrl + "?action=getPageData", { redirect: "follow" })
             .then(function(r) { return r.json(); })
-            .then(function(data) { renderBusyLevel(data.level); })
-            .catch(function() { renderBusyLevel(1); });
-    }
- 
-    // --- ดึงข้อมูลคิว ---
-    if (document.getElementById("queue-loading")) {
-        fetch(googleScriptUrl + "?action=getQueueInfo", { redirect: "follow" })
-            .then(response => response.json())
             .then(function(info) {
+                // ส่วนระดับความยุ่ง
+                renderBusyLevel(info.level);
+
+                // ส่วนข้อมูลคิว
+                if (!document.getElementById("queue-loading")) return;
+
                 document.getElementById("queue-loading").style.display = "none";
                 document.getElementById("queue-content").style.display = "block";
  
@@ -134,7 +133,9 @@ window.addEventListener('DOMContentLoaded', function() {
                 document.getElementById("q-wait-wrap").style.display  = "block";
             })
             .catch(function(err) {
-                document.getElementById("queue-loading").textContent = "ไม่สามารถโหลดข้อมูลคิวได้ (เกิดข้อผิดพลาดของระบบ)";
+                renderBusyLevel(1);
+                var loadingEl = document.getElementById("queue-loading");
+                if (loadingEl) loadingEl.textContent = "ไม่สามารถโหลดข้อมูลคิวได้ (เกิดข้อผิดพลาดของระบบ)";
                 console.error(err);
             });
     }
