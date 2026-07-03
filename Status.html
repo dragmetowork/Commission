@@ -459,32 +459,6 @@
   </div>
 
   <script src="script.js"></script>
-  <script>
-    const busyData = {
-      1: { label: 'ปกติ',     sub: 'รับคิวได้ตามปกติค่ะ',                dot: '#1D9E75' },
-      2: { label: 'ยุ่ง',      sub: 'คิวเริ่มเยอะ อาจใช้เวลานานขึ้น',    dot: '#BA7517' },
-      3: { label: 'เดือด',     sub: 'คิวเกือบเต็ม กำลังพิจารณาปิดรับ',   dot: '#993C1D' },
-      4: { label: 'เดือดมาก',  sub: 'ปิดรับคิวชั่วคราว โปรดติดตามประกาศ', dot: '#A32D2D' }
-    };
-
-    function renderBusyLevel(level) {
-      var n = parseInt(level) || 1;
-      var d = busyData[n] || busyData[1];
-      [1,2,3,4].forEach(function(i) {
-        var el = document.getElementById('bs' + i);
-        if (!el) return;
-        el.className = 'busy-seg bs' + i + (i === n ? ' active' : i < n ? ' passed' : '');
-      });
-      document.getElementById('busy-label').textContent    = d.label;
-      document.getElementById('busy-sub').textContent      = d.sub;
-      document.getElementById('busy-dot').style.background = d.dot;
-    }
-
-    fetch(googleScriptUrl + "?action=getBusyLevel", { redirect: "follow" })
-      .then(function(r) { return r.json(); })
-      .then(function(data) { renderBusyLevel(data.level); })
-      .catch(function() { renderBusyLevel(1); });
-  </script>
 
 </body>
 </html>
