@@ -181,6 +181,9 @@
       margin-top: 8px; line-height: 1.5;
     }
     #offer-warning.show { display: block; }
+    #offer-warning.critical {
+      background: #fdeaea; border-color: #e88282; color: #8b2222;
+    }
 
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -721,6 +724,7 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyMG9uFpdSr8XV-C4WHMdUDj7LjLDYEJkxmNj0GNibX8LyS1nKYsYQ6ES2kpIyp7kzag/exec";
 const BRIEF_ALLOWED_DOMAINS = ["docs.google.com","drive.google.com","notion.so","notion.site","canva.com","figma.com","dropbox.com","onedrive.live.com","1drv.ms"];
+const MIN_OFFER_GAP = 1000; // ราคาที่เสนอต้องสูงกว่าราคาประเมินอย่างน้อย 1,000 บาท
 
 function validateBriefLink(url) {
   try { const u = new URL(url); return BRIEF_ALLOWED_DOMAINS.some(d => u.hostname === d || u.hostname.endsWith("." + d)); }
@@ -909,12 +913,17 @@ function checkOfferPrice() {
   const offerVal = parseInt(document.getElementById("offeredPrice").value) || 0;
   const warning  = document.getElementById("offer-warning");
 
-  if (currentCalcPrice > 0 && offerVal > 0 && offerVal < currentCalcPrice) {
-    document.getElementById("warn-offer").textContent = offerVal.toLocaleString();
-    document.getElementById("warn-base").textContent  = currentCalcPrice.toLocaleString();
-    warning.classList.add("show");
+  if (currentCalcPrice > 0 && offerVal > 0) {
+    const minAllowed = currentCalcPrice + MIN_OFFER_GAP;
+    if (offerVal < minAllowed) {
+      warning.classList.add("critical");
+      warning.innerHTML = `⚠️ ราคาที่คุณเสนอ (<strong>${offerVal.toLocaleString()}</strong> บาท) ยังไม่ถึงราคาขั้นต่ำที่รับได้ (<strong>${minAllowed.toLocaleString()}</strong> บาท) — ต้องเสนอราคาสูงกว่าราคาประเมิน (${currentCalcPrice.toLocaleString()} บาท) อย่างน้อย ${MIN_OFFER_GAP.toLocaleString()} บาท กรุณาปรับราคาใหม่ค่ะ`;
+      warning.classList.add("show");
+    } else {
+      warning.classList.remove("critical", "show");
+    }
   } else {
-    warning.classList.remove("show");
+    warning.classList.remove("show", "critical");
   }
 }
 
@@ -1001,6 +1010,12 @@ async function submitForm() {
   if (orderType === "custom_offer") {
     const offerVal = parseInt(document.getElementById("offeredPrice").value) || 0;
     if (!offerVal || offerVal < 1) return showError("กรุณาระบุราคาที่ต้องการเสนอด้วยนะคะ");
+    if (currentCalcPrice > 0) {
+      const minAllowed = currentCalcPrice + MIN_OFFER_GAP;
+      if (offerVal < minAllowed) {
+        return showError(`ราคาที่เสนอต้องไม่ต่ำกว่า ${minAllowed.toLocaleString()} บาท (ต้องสูงกว่าราคาประเมิน ${currentCalcPrice.toLocaleString()} บาท อย่างน้อย ${MIN_OFFER_GAP.toLocaleString()} บาท)`);
+      }
+    }
     finalPriceToSend = offerVal.toLocaleString() + " บาท (เสนอราคาเอง)";
   } else {
     finalPriceToSend = document.getElementById("total-price").textContent + " บาท";
